@@ -152,6 +152,50 @@ module Seahorse
     end
   end
 
+  # This Type has a map_key type (which defaults to string)
+  # an a value type (members).
+  class MapType < Type
+    attr_accessor :members
+
+    def initialize(*args)
+      super
+    end
+
+    def complex?; true end
+
+    def map_key
+      @map_key || StringType.new
+    end
+
+    def map_key(shape, &block)
+      # TODO?
+      @map_key = shape
+    end
+
+    def add(shape)
+      self.members = shape
+    end
+
+    def to_hash
+      super.tap do |hash|
+        hash['key'] = map_key.to_hash
+        hash['members'] = members ? members.to_hash : {}
+      end
+    end
+
+    def from_input(data, filter = true)
+      # TODO
+    end
+
+    def to_output(data)
+      # TODO
+    end
+
+    def to_strong_params
+      # TODO
+    end
+  end
+
   class StructureType < Type
     attr_accessor :members
 

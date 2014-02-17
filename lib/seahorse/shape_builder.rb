@@ -10,6 +10,7 @@ module Seahorse
                   boolean: [BooleanType, nil],
                   float: [FloatType, nil],
                   list: [ListType, nil],
+                  map: [MapType, nil],
                   structure: [StructureType, nil]
       hash
     end
@@ -22,6 +23,14 @@ module Seahorse
 
     def self.type_class_for(type)
       @@types[type] ? @@types[type][0] : nil
+    end
+
+    # Returns a new instance of the specified type.
+    # @return [Seahorse::Type]
+    def self.instance_of_type(type = nil, &block)
+      type_class_for(type || 'structure').new.tap do |instance|
+        self.new(instance).build(&block)
+      end
     end
 
     def initialize(context)
@@ -80,6 +89,10 @@ module Seahorse
       true
     end
 
-    @@types = build_default_types
+    def self.reset_types!
+      class_variable_set(:@@types, build_default_types)
+    end
+
+    reset_types!
   end
 end

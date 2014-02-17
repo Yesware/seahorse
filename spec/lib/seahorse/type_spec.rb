@@ -39,3 +39,77 @@ describe Seahorse::FloatType do
     end
   end
 end
+
+# To better understand how ListType works ...
+describe Seahorse::ListType do
+
+  before(:each) do
+    Seahorse::ShapeBuilder.send(:reset_types!)
+  end
+
+  context 'a list of strings' do
+    before(:each) do
+      Seahorse::ShapeBuilder.type(:scalar_list, 'list') do
+        string
+      end
+    end
+
+    it 'uses the string type as the collection' do
+      instance = Seahorse::ShapeBuilder.instance_of_type(:scalar_list)
+      instance.collection.
+          should be_instance_of(Seahorse::StringType)
+    end
+  end
+
+  context 'a list of inline structures' do
+    before(:each) do
+      Seahorse::ShapeBuilder.type(:structure_list, 'list') do
+        structure :person do
+          string :name
+          string :email
+          integer :age
+        end
+      end
+    end
+
+    it 'uses the structure type as the collection' do
+      instance = Seahorse::ShapeBuilder.instance_of_type(:structure_list)
+      col = instance.collection
+      col.should be_instance_of(Seahorse::StructureType)
+    end
+
+    it 'names the inline structure' do
+      instance = Seahorse::ShapeBuilder.instance_of_type(:structure_list)
+      col = instance.collection
+    end
+
+    it 'does not store the definition of the inline structure' do
+      instance = Seahorse::ShapeBuilder.instance_of_type(:structure_list)
+      col = instance.collection
+      Seahorse::ShapeBuilder.type_class_for(:person).should be_nil
+    end
+
+  end
+
+  context 'a list of a predefined structure type' do
+    before(:each) do
+      Seahorse::ShapeBuilder.type(:person) do
+        string :name
+        string :email
+        integer :age
+      end
+      Seahorse::ShapeBuilder.type(:structure_list, 'list') { person }
+    end
+
+    it 'uses the structure type as the collection' do
+      instance = Seahorse::ShapeBuilder.instance_of_type(:structure_list)
+      instance.collection.should \
+          be_instance_of(Seahorse::ShapeBuilder.type_class_for(:person))
+    end
+  end
+end
+
+describe Seahorse::MapType do
+
+
+end

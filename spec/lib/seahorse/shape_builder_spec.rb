@@ -19,4 +19,8 @@ describe Seahorse::ShapeBuilder do
       end
     end
   end
+
+  describe '.instance_of_type' do
+
+  end
 end
